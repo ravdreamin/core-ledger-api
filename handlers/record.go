@@ -54,3 +54,45 @@ func CreateRecordHandler(pool *pgxpool.Pool) http.HandlerFunc {
 		}
 	}
 }
+
+type RecordResponse struct {
+	ID          int     `json:"id"`
+	Amount      float64 `json:"amount"`
+	Type        string  `json:"type"`
+	Category    string  `json:"category"`
+	Description string  `json:"description"`
+}
+
+func GetRecordsHandler(pool *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := r.Context().Value(middleware.UserIDKey).(int)
+
+		query := `
+			SELECT r.id, r.amount, r.type, c.name as category, r.description
+			FROM records r
+			JOIN categories c ON r.category_id = c.id
+			WHERE r.user_id = $1
+			ORDER BY r.date DESC
+		`
+
+		rows, err := pool.Query(r.Context(), query, userID)
+		if err != nil {
+			http.Error(w, "Failed to fetch records", http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		records := make([]RecordResponse, 0)
+		for rows.Next() {
+			var rec RecordResponse
+			if err := rows.Scan(&rec.ID, &rec.Amount, &rec.Type, &rec.Category, &rec.Description); err != nil {
+				continue
+			}
+			records = append(records, rec)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(records)
+	}
+}

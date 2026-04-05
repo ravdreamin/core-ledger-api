@@ -1,124 +1,169 @@
 {
 	"info": {
-		"_postman_id": "12345678-1234-1234-1234-123456789012",
-		"name": "Core Ledger API",
-		"description": "FinTech API Assessment for managing financial records and calculating category-based summaries.",
+		"_postman_id": "8bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+		"name": "Core Ledger API (Role Based)",
+		"description": "## FinTech API Assessment\n\nThis API dictates strict Role Based Access Control (RBAC):\n- **Admin**: Has all access (`POST /records`, `GET /records`, `GET /dashboard/categories`, `GET /dashboard/summary`).\n- **Analyst**: Has readonly access (`GET /records`, `GET /dashboard/categories`, `GET /dashboard/summary`).\n- **Viewer**: Has basic readonly access (`GET /dashboard/summary`).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "1. Login (Generate Token)",
-			"event": [
+			"name": "1. Authentication",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"var jsonData = pm.response.json();",
-							"pm.environment.set(\"paseto_token\", jsonData.token);"
+					"name": "Login (As Admin, Analyst, or Viewer)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"paseto_token\", jsonData.token);",
+									"    console.log(\"Token captured automatically!\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
 						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"gk123456\"\n}"
-				},
-				"url": {
-					"raw": "{{base_url}}/login",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"login"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "2. Get Dashboard Summary",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{paseto_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{base_url}}/dashboard/summary",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"dashboard",
-						"summary"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "3. Get Dashboard Categories Report",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{paseto_token}}"
-					}
-				],
-				"url": {
-					"raw": "{{base_url}}/dashboard/categories",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"dashboard",
-						"categories"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "4. Create Record",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{paseto_token}}"
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"gk123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"login"
+							]
+						},
+						"description": "**Roles Required:** `Public`\n\nUse usernames: `admin`, `analyst`, or `viewer` with password `gk123456`. The script automatically saves the `paseto_token`."
 					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"category_id\": 2,\n    \"amount\": 850,\n    \"type\": \"expense\",\n    \"description\": \"Midnight snack run\"\n}"
-				},
-				"url": {
-					"raw": "{{base_url}}/records",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"records"
-					]
+					"response": []
 				}
-			},
-			"response": []
+			]
+		},
+		{
+			"name": "2. Records (Transactions)",
+			"item": [
+				{
+					"name": "Get Records List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{paseto_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/records",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"records"
+							]
+						},
+						"description": "**Roles Required:** `admin`, `analyst`\n\nFetches all individual transaction records for the logged-in user, enriched with their Category names."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Record",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{paseto_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"category_id\": 2,\n    \"amount\": 850,\n    \"type\": \"expense\",\n    \"description\": \"Midnight snack run\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/records",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"records"
+							]
+						},
+						"description": "**Roles Required:** `admin`\n\nInserts a new expense or income record. Denied for Analyst or Viewer."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Dashboards & Reports",
+			"item": [
+				{
+					"name": "Get Summary Info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{paseto_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/summary",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dashboard",
+								"summary"
+							]
+						},
+						"description": "**Roles Required:** `admin`, `analyst`, `viewer`\n\nBasic summary data indicating explicit `total_income`, `total_expense`, and derived `balance`."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Categories Aggregation",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{paseto_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/dashboard/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dashboard",
+								"categories"
+							]
+						},
+						"description": "**Roles Required:** `admin`, `analyst`\n\nDetailed breakdown grouping expenses/income by Category."
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"variable": [

@@ -39,6 +39,7 @@ All secure endpoints utilize PASETO based Bearer `Authorization: Bearer <token>`
 | `/login` | `POST` | *Public* | Validates provided credentials. Returns a PASETO token resolving to specific roles. |
 | `/dashboard/summary` | `GET` | `admin`, `analyst`, `viewer` | Returns `total_income`, `total_expense`, and `balance` computations dynamically calculated against your dataset. Logs 0 for unrecorded aggregates. |
 | `/dashboard/categories` | `GET` | `admin`, `analyst` | Aggregates all transactions by their parent `Categories` to emit arrays of `category_name` and `total_amount`. Fully structured logic natively drops empty schemas as explicit `[]` arrays. |
+| `/records` | `GET` | `admin`, `analyst` | Read-only access to a detailed list of all explicit financial records associated with the logged-in user, properly ordered by date. |
 | `/records` | `POST` | `admin` | Inserts a new financial record mapping to user IDs and category references respectively. |
 
 ## Seeded Data & Schema Internals

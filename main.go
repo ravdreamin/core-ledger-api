@@ -40,6 +40,10 @@ func main() {
 		middleware.RequireRole(handlers.CreateRecordHandler(pool), "admin"),
 	))
 
+	http.HandleFunc("GET /records", middleware.RequireAuth(cfg.PasetoKey, 
+		middleware.RequireRole(handlers.GetRecordsHandler(pool), "admin", "analyst"),
+	))
+
 	// 4. Start the HTTP Server
 	log.Printf("Starting server on port %s...\n", cfg.ServerPort)
 	if err := http.ListenAndServe(":"+cfg.ServerPort, nil); err != nil {
