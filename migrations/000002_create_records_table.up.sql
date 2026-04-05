@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS records (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    amount BIGINT NOT NULL,
+    type VARCHAR(10) NOT NULL CHECK (type IN ('income', 'expense')),
+    category VARCHAR(100) NOT NULL,
+    date TIMESTAMP WITH TIME ZONE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

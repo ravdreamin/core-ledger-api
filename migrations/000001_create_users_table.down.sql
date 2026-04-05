@@ -1,0 +1,1 @@
+ROP TABLE IF EXISTS users;
